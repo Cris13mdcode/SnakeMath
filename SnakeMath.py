@@ -289,8 +289,8 @@ def show_difficulty_menu():
 
 # ─── Funcție pentru game over ───────────────────────────────────────────
 def game_over(score):
-    msg1 = font.render(f"GAME OVER - Score: {score}", True, (0, 0, 0))
-    msg2 = font.render("R to restart", True, (0, 0, 0))
+    msg1 = font.render(f"GAME OVER - Score: {score}", True, (255, 255, 255))
+    msg2 = font.render("R to restart", True, (255, 255, 255))
     screen.blit(msg1, msg1.get_rect(center=(WIDTH//2, HEIGHT//2 - 20)))
     screen.blit(msg2, msg2.get_rect(center=(WIDTH//2, HEIGHT//2 + 20)))
     pygame.display.flip()
@@ -306,8 +306,8 @@ def game_over(score):
 # ─── Logica joc ─────────────────────────────────────────────────────────
 def random_cell(exclude):
     while True:
-        x = random.randrange(0, WIDTH, CELL)
-        y = random.randrange(0, HEIGHT, CELL)
+        x = random.randrange(CELL, WIDTH - CELL, CELL)
+        y = random.randrange(CELL, HEIGHT - CELL, CELL)
         if (x, y) not in exclude:
             return (x, y)
 
@@ -344,9 +344,27 @@ def main():
             continue
 
         # ─ Mișcă șarpele ─
-        new_head = (snake[0][0] + direction[0], snake[0][1] + direction[1])
-        new_head = ((new_head[0] + WIDTH) % WIDTH, (new_head[1] + HEIGHT) % HEIGHT)
-        snake.insert(0, new_head)
+        proposed_head = (snake[0][0] + direction[0], snake[0][1] + direction[1])
+        # Dacă lovește peretele sau propriul corp: pierde o unitate din lungime și rămâne pe loc
+        hits_wall = not (0 <= proposed_head[0] < WIDTH) or not (0 <= proposed_head[1] < HEIGHT)
+        hits_self = proposed_head in snake
+        if hits_wall or hits_self:
+            if len(snake) > 1:
+                snake.pop()  # reduce lungimea cu 1
+                # sari peste restul logicii acestui frame
+                # (nu mutăm capul, nu verificăm mărul)
+                # continua la următorul ciclu
+                # folosim continue din buclă
+                # notă: sum și score rămân neschimbate
+                pass
+            else:
+                return game_over(score)
+            # Trecem la următoarea iterație fără alte acțiuni
+            continue
+        else:
+            # Mișcare normală
+            new_head = proposed_head
+            snake.insert(0, new_head)
 
         # ─ Coliziune cu mărul ─
         ate_apple = False
@@ -355,9 +373,16 @@ def main():
         else:
             snake.pop()  # Mișcare normală, pop coada
 
-        # ─ Coliziune cu sine ─
+        # ─ Coliziune cu sine (fallback) ─
+        # În mod normal e prins înainte de mutare, dar păstrăm un fallback defensiv
         if new_head in snake[1:]:
-            return game_over(score)
+            if len(snake) > 1:
+                # Anulăm mutarea capului și scurtăm coada
+                snake.pop(0)
+                snake.pop()
+                continue
+            else:
+                return game_over(score)
 
         # Dacă a mâncat mărul, arată întrebarea
         if ate_apple:
@@ -410,3 +435,5 @@ def main():
 # ─── Rulează jocul ─────────────────────────────────────────────────────
 if __name__ == "__main__":
     main()
+
+
