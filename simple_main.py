@@ -10,12 +10,16 @@ def main():
     pygame.display.set_caption("Test publicare - imagine rotită")
     clock = pygame.time.Clock()
 
-    # --- Creăm o "imagine" simplă (un pătrat colorat) ---
+    # --- Creăm o "imagine" simplă (un pătrat jumătate albastru, jumătate roșu) ---
     # Nu depindem de fișiere externe, ca să fie proiectul cât mai simplu.
     size = 150
     base_surf = pygame.Surface((size, size), pygame.SRCALPHA)
-    base_surf.fill((0, 180, 255))          # albastru deschis
-    pygame.draw.rect(base_surf, (255, 255, 255), (10, 10, size - 20, size - 20), 8)
+    # Jumătate stângă - albastru
+    pygame.draw.rect(base_surf, (0, 100, 255), (0, 0, size // 2, size))
+    # Jumătate dreaptă - roșu
+    pygame.draw.rect(base_surf, (255, 50, 50), (size // 2, 0, size // 2, size))
+    # Contur alb pentru claritate
+    pygame.draw.rect(base_surf, (255, 255, 255), (0, 0, size, size), 4)
 
     angle = 0
 
@@ -30,14 +34,14 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                # Patru taste care setează unghiul imaginii
-                if event.key == pygame.K_UP:
+                # Patru taste care setează unghiul imaginii (WASD)
+                if event.key == pygame.K_w:
                     angle = 0          # sus
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_d:
                     angle = -90        # dreapta
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_s:
                     angle = 180        # jos
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_a:
                     angle = 90         # stânga
 
         screen.fill((30, 30, 30))
@@ -48,7 +52,7 @@ def main():
         screen.blit(rotated, rect)
 
         # Instrucțiuni pe ecran
-        text = font.render("Foloseste sagetile (↑ ↓ ← →) pentru rotire, ESC pentru iesire", True, (220, 220, 220))
+        text = font.render("Foloseste W A S D pentru rotire, ESC pentru iesire", True, (220, 220, 220))
         text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT - 40))
         screen.blit(text, text_rect)
 
