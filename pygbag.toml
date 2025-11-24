@@ -1,0 +1,8 @@
+[project]
+name = "MathSnake"
+version = "1.0"
+sources = ["simple_main.py"]
+entrypoint = "simple_main.py"
+
+[python]
+version = "3.11"
